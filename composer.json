@@ -1,15 +1,18 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/vue-starter-kit",
+    "name": "solayman/orbit",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Real-time project management app built with Laravel, Inertia, and Vue.",
     "keywords": [
         "laravel",
-        "framework"
+        "vue",
+        "inertia",
+        "kanban",
+        "real-time"
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "inertiajs/inertia-laravel": "^3.0",
         "laravel/chisel": "^0.1.0",
         "laravel/fortify": "^1.37.2",
@@ -18,6 +21,7 @@
         "laravel/wayfinder": "^0.1.14"
     },
     "require-dev": {
+        "driftingly/rector-laravel": "^2.7",
         "fakerphp/faker": "^1.24",
         "larastan/larastan": "^3.9",
         "laravel/pail": "^1.2.5",
@@ -26,7 +30,10 @@
         "laravel/sail": "^1.53",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.9.3",
-        "phpunit/phpunit": "^12.5.23"
+        "pestphp/pest": "^5.3",
+        "pestphp/pest-plugin-drift": "^5.0",
+        "pestphp/pest-plugin-laravel": "^5.0",
+        "rector/rector": "^2.7"
     },
     "autoload": {
         "psr-4": {
@@ -65,12 +72,19 @@
             "npm run types:check",
             "@test"
         ],
+        "refactor": [
+            "rector"
+        ],
+        "refactor:check": [
+            "rector --dry-run"
+        ],
         "types:check": [
-            "phpstan analyse"
+            "phpstan analyse --memory-limit=1G"
         ],
         "test": [
             "@php artisan config:clear --ansi",
             "@lint:check",
+            "@refactor:check",
             "@types:check",
             "@php artisan test"
         ],
