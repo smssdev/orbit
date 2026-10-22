@@ -2,17 +2,17 @@
 
 A real-time project management app: workspaces, Kanban boards, live collaboration, and a keyboard-first interface.
 
-> **Status: in active development.** Built in public as a portfolio project. The roadmap below shows what's done and what's next.
+> **Status: in active development.** A portfolio project. The roadmap below shows what's done and what's next.
 
 ## Tech stack
 
-| Layer | Choice |
-|---|---|
-| Back end | Laravel 13, PHP 8.4+ |
+| Layer     | Choice                                                          |
+| --------- | --------------------------------------------------------------- |
+| Back end  | Laravel 13, PHP 8.4+                                            |
 | Front end | Vue 3 (`<script setup>`, TypeScript), Inertia 3, Tailwind CSS 4 |
-| Routing | Laravel Wayfinder (type-safe routes in TypeScript) |
-| Real-time | Laravel Reverb + Echo *(planned)* |
-| Auth | Laravel Fortify (2FA, passkeys) |
+| Routing   | Laravel Wayfinder (type-safe routes in TypeScript)              |
+| Real-time | Laravel Reverb + Echo _(planned)_                               |
+| Auth      | Laravel Fortify (2FA, passkeys)                                 |
 
 ## Code quality
 
