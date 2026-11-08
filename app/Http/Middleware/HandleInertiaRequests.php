@@ -2,7 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\ProjectColor;
+use App\Enums\ProjectIcon;
 use App\Enums\WorkspaceRole;
+use App\Models\Project;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
@@ -47,6 +50,8 @@ class HandleInertiaRequests extends Middleware
             // Lazy, so they reflect any workspace switch made later in the request (e.g. by EnsureCurrentWorkspace).
             'workspaces' => fn (): array => $this->workspaces($request),
             'currentWorkspace' => fn (): ?array => $this->currentWorkspace($request),
+            // The current workspace's active projects, for the sidebar.
+            'projects' => fn (): array => $this->projects($request),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }
@@ -83,6 +88,32 @@ class HandleInertiaRequests extends Middleware
         $workspace = $user->workspaces()->whereKey($user->current_workspace_id)->first();
 
         return $workspace instanceof Workspace ? $this->workspaceSummary($workspace) : null;
+    }
+
+    /**
+     * @return list<array{id: int, name: string, color: ProjectColor, icon: ProjectIcon}>
+     */
+    private function projects(Request $request): array
+    {
+        $user = $request->user();
+
+        if (! $user instanceof User || $user->current_workspace_id === null) {
+            return [];
+        }
+
+        return array_values(Project::query()
+            ->where('workspace_id', $user->current_workspace_id)
+            ->whereHas('workspace.members', fn ($query) => $query->whereKey($user->id))
+            ->active()
+            ->orderBy('name')
+            ->get(['id', 'name', 'color', 'icon'])
+            ->map(fn (Project $project): array => [
+                'id' => $project->id,
+                'name' => $project->name,
+                'color' => $project->color,
+                'icon' => $project->icon,
+            ])
+            ->all());
     }
 
     /**
