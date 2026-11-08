@@ -1,5 +1,6 @@
 import type { Directive } from 'vue';
 import type { Auth } from '@/types/auth';
+import type { ProjectLink } from '@/types/project';
 import type { WorkspaceSummary } from '@/types/workspace';
 
 // Extend ImportMeta interface for Vite...
@@ -23,6 +24,7 @@ declare module '@inertiajs/core' {
             sidebarOpen: boolean;
             workspaces: WorkspaceSummary[];
             currentWorkspace: WorkspaceSummary | null;
+            projects: ProjectLink[];
             [key: string]: unknown;
         };
     }

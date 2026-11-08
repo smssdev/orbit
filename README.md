@@ -30,15 +30,18 @@ composer ci:check
 
 ## Roadmap
 
+**v1**, one pull request per step:
+
 - [x] Project setup, quality tooling, CI
 - [x] Workspaces, members, and invitations
-- [ ] Projects, Kanban board, drag and drop with optimistic updates
-- [ ] Task details: rich text, labels, assignees, due dates, attachments
-- [ ] Real-time updates and presence (Reverb)
-- [ ] Comments, @mentions, notifications, activity log
-- [ ] Command palette (Ctrl+K) and keyboard shortcuts
-- [ ] Dark mode, Arabic/English with RTL
-- [ ] Live demo
+- [x] Projects: create, edit, archive and restore, colours and icons, the active ones in the sidebar
+- [ ] Kanban board: editable columns, drag and drop for cards and columns with optimistic updates, order saved on the server, keyboard support
+- [ ] Task details: a side panel with description, assignee, due date, priority, and labels
+- [ ] Arabic/English with full RTL, and a refined dark mode
+- [ ] One-click demo login with realistic seed data reset on a schedule, and a polished welcome page
+- [ ] Final polish (loading and empty states, accessibility, performance), then the live demo at `orbit.smszs.tech`
+
+**After v1:** real-time updates and presence (Reverb), comments, @mentions, notifications and activity log, and the command palette (Ctrl+K) with keyboard shortcuts.
 
 ## Local setup
 

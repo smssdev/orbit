@@ -23,6 +23,7 @@ use Illuminate\Support\Carbon;
  * @property-read User $owner
  * @property-read Collection<int, User> $members
  * @property-read Collection<int, WorkspaceInvitation> $invitations
+ * @property-read Collection<int, Project> $projects
  */
 #[Fillable(['name', 'owner_id'])]
 class Workspace extends Model
@@ -56,6 +57,14 @@ class Workspace extends Model
     public function invitations(): HasMany
     {
         return $this->hasMany(WorkspaceInvitation::class);
+    }
+
+    /**
+     * @return HasMany<Project, $this>
+     */
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
     }
 
     public function addMember(User $user, WorkspaceRole $role): void

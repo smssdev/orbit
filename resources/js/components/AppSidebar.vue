@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import { BookOpen, FolderGit2, LayoutGrid, Users } from '@lucide/vue';
+import {
+    BookOpen,
+    FolderGit2,
+    FolderKanban,
+    LayoutGrid,
+    Users,
+} from '@lucide/vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
+import NavProjects from '@/components/projects/NavProjects.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
     Sidebar,
@@ -11,6 +18,7 @@ import {
 } from '@/components/ui/sidebar';
 import WorkspaceSwitcher from '@/components/WorkspaceSwitcher.vue';
 import { dashboard } from '@/routes';
+import { index as projectsIndex } from '@/routes/projects';
 import { index as workspaceMembers } from '@/routes/workspace/members';
 import type { NavItem } from '@/types';
 
@@ -19,6 +27,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Projects',
+        href: projectsIndex(),
+        icon: FolderKanban,
     },
     {
         title: 'Members',
@@ -49,6 +62,7 @@ const footerNavItems: NavItem[] = [
 
         <SidebarContent>
             <NavMain :items="mainNavItems" />
+            <NavProjects />
         </SidebarContent>
 
         <SidebarFooter>

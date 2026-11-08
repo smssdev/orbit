@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Projects\ProjectArchiveController;
+use App\Http\Controllers\Projects\ProjectController;
 use App\Http\Controllers\Workspaces\AcceptInvitationController;
 use App\Http\Controllers\Workspaces\CurrentWorkspaceController;
 use App\Http\Controllers\Workspaces\InvitationController;
@@ -23,6 +25,17 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
         Route::post('invitations', [InvitationController::class, 'store'])->name('invitations.store');
         Route::delete('invitations/{invitation}', [InvitationController::class, 'destroy'])->name('invitations.destroy');
+    });
+
+    // Projects of the current workspace (a project from another one answers 404).
+    Route::middleware('workspace')->group(function (): void {
+        Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
+        Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
+        Route::get('projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+        Route::patch('projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
+        Route::delete('projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+        Route::post('projects/{project}/archive', [ProjectArchiveController::class, 'store'])->name('projects.archive');
+        Route::delete('projects/{project}/archive', [ProjectArchiveController::class, 'destroy'])->name('projects.restore');
     });
 });
 
