@@ -8,7 +8,7 @@ test('guests are redirected to the login page', function (): void {
 });
 
 test('authenticated users can visit the dashboard', function (): void {
-    $user = User::factory()->create();
+    $user = User::factory()->withWorkspace()->create();
     $this->actingAs($user);
 
     $response = $this->get(route('dashboard'));

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -44,6 +45,18 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes): array => [
             'email_verified_at' => null,
         ]);
+    }
+
+    /**
+     * Give the user a workspace they own and make it their current one.
+     */
+    public function withWorkspace(string $name = 'Acme'): static
+    {
+        return $this->afterCreating(function (User $user) use ($name): void {
+            $workspace = Workspace::factory()->for($user, 'owner')->create(['name' => $name]);
+
+            $user->switchWorkspace($workspace);
+        });
     }
 
     /**

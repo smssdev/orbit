@@ -31,7 +31,7 @@ composer ci:check
 ## Roadmap
 
 - [x] Project setup, quality tooling, CI
-- [ ] Workspaces, members, and invitations
+- [x] Workspaces, members, and invitations
 - [ ] Projects, Kanban board, drag and drop with optimistic updates
 - [ ] Task details: rich text, labels, assignees, due dates, attachments
 - [ ] Real-time updates and presence (Reverb)
