@@ -6,7 +6,7 @@ import SettingsLayout from '@/layouts/settings/Layout.vue';
 import WorkspaceLayout from '@/layouts/workspace/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Orbit';
 
 void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
