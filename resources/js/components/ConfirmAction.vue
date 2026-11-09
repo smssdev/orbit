@@ -14,6 +14,9 @@ import {
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
 import type { RouteDefinition } from '@/wayfinder';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 const props = defineProps<{
     title: string;
@@ -47,7 +50,7 @@ function confirm(): void {
             </DialogHeader>
             <DialogFooter class="gap-2">
                 <DialogClose as-child>
-                    <Button variant="secondary">Cancel</Button>
+                    <Button variant="secondary">{{ t('Cancel') }}</Button>
                 </DialogClose>
                 <Button
                     variant="destructive"

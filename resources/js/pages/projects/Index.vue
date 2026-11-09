@@ -6,6 +6,7 @@ import Heading from '@/components/Heading.vue';
 import ProjectBadge from '@/components/projects/ProjectBadge.vue';
 import ProjectFormDialog from '@/components/projects/ProjectFormDialog.vue';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/composables/useI18n';
 import { fromNow } from '@/lib/workspaces';
 import { cn } from '@/lib/utils';
 import { index as projectsIndex, show as showProject } from '@/routes/projects';
@@ -25,6 +26,8 @@ defineProps<{
     icons: ProjectIcon[];
 }>();
 
+const { t, locale } = useI18n();
+
 const creating = ref(false);
 
 // The sidebar's «+» lands here with ?new=1: open the dialog straight away.
@@ -36,7 +39,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head title="Projects" />
+    <Head :title="t('Projects')" />
 
     <div class="flex flex-1 flex-col gap-6 p-4">
         <div class="flex flex-wrap items-start justify-between gap-4">
@@ -46,11 +49,11 @@ onMounted(() => {
             />
             <Button data-test="new-project-button" @click="creating = true">
                 <Plus />
-                New project
+                {{ t('New project') }}
             </Button>
         </div>
 
-        <nav class="flex gap-1 border-b" aria-label="Project filter">
+        <nav class="flex gap-1 border-b" :aria-label="t('Project filter')">
             <Link
                 v-for="tab in ['active', 'archived'] as const"
                 :key="tab"
@@ -70,8 +73,8 @@ onMounted(() => {
                 :aria-current="filter === tab ? 'page' : undefined"
                 preserve-scroll
             >
-                {{ tab === 'active' ? 'Active' : 'Archived' }}
-                <span class="ml-1 text-xs text-muted-foreground tabular-nums">{{
+                {{ tab === 'active' ? t('Active') : t('Archived') }}
+                <span class="ms-1 text-xs text-muted-foreground tabular-nums">{{
                     counts[tab]
                 }}</span>
             </Link>
@@ -84,14 +87,20 @@ onMounted(() => {
             <FolderOpen class="size-10 text-muted-foreground" />
             <p class="font-medium">
                 {{
-                    filter === 'active' ? 'No projects yet' : 'Nothing archived'
+                    filter === 'active'
+                        ? t('No projects yet')
+                        : t('Nothing archived')
                 }}
             </p>
             <p class="max-w-sm text-sm text-muted-foreground">
                 {{
                     filter === 'active'
-                        ? 'Create the first one to give your team a place to plan and track work.'
-                        : 'Archived projects leave the sidebar but keep everything. You can restore them any time.'
+                        ? t(
+                              'Create the first one to give your team a place to plan and track work.',
+                          )
+                        : t(
+                              'Archived projects leave the sidebar but keep everything. You can restore them any time.',
+                          )
                 }}
             </p>
             <Button
@@ -100,7 +109,7 @@ onMounted(() => {
                 @click="creating = true"
             >
                 <Plus />
-                New project
+                {{ t('New project') }}
             </Button>
         </div>
 
@@ -124,7 +133,14 @@ onMounted(() => {
                             v-if="project.archivedAt"
                             class="mt-2 text-xs text-muted-foreground"
                         >
-                            Archived {{ fromNow(project.archivedAt) }}
+                            {{
+                                t('Archived :time', {
+                                    time: fromNow(
+                                        project.archivedAt,
+                                        locale.current,
+                                    ),
+                                })
+                            }}
                         </p>
                     </div>
                 </Link>

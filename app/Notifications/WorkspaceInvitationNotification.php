@@ -31,14 +31,21 @@ class WorkspaceInvitationNotification extends Notification implements ShouldQueu
     public function toMail(object $notifiable): MailMessage
     {
         $workspace = $this->invitation->workspace->name;
-        $inviter = $this->invitation->inviter->name ?? 'A teammate';
+        $inviter = $this->invitation->inviter->name ?? __('A teammate');
 
         return (new MailMessage)
-            ->subject("You're invited to join {$workspace} on ".config()->string('app.name'))
-            ->greeting('Hello!')
-            ->line("{$inviter} invited you to join **{$workspace}** as {$this->invitation->role->label()}.")
-            ->action('Accept invitation', route('invitations.show', $this->token))
-            ->line('This invitation expires in '.WorkspaceInvitation::EXPIRES_AFTER_DAYS.' days.')
-            ->line("If you weren't expecting this invitation, you can ignore this email.");
+            ->subject(__("You're invited to join :workspace on :app", [
+                'workspace' => $workspace,
+                'app' => config()->string('app.name'),
+            ]))
+            ->greeting(__('Hello!'))
+            ->line(__(':inviter invited you to join **:workspace** as :role.', [
+                'inviter' => $inviter,
+                'workspace' => $workspace,
+                'role' => $this->invitation->role->label(),
+            ]))
+            ->action(__('Accept invitation'), route('invitations.show', $this->token))
+            ->line(__('This invitation expires in :days days.', ['days' => WorkspaceInvitation::EXPIRES_AFTER_DAYS]))
+            ->line(__("If you weren't expecting this invitation, you can ignore this email."));
     }
 }

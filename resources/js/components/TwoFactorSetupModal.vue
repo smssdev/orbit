@@ -23,6 +23,9 @@ import { useAppearance } from '@/composables/useAppearance';
 import { useTwoFactorAuth } from '@/composables/useTwoFactorAuth';
 import { confirm } from '@/routes/two-factor';
 import type { TwoFactorConfigContent } from '@/types';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 type Props = {
     requiresConfirmation: boolean;
@@ -46,26 +49,30 @@ const pinInputContainerRef = useTemplateRef('pinInputContainerRef');
 const modalConfig = computed<TwoFactorConfigContent>(() => {
     if (props.twoFactorEnabled) {
         return {
-            title: 'Two-factor authentication enabled',
-            description:
+            title: t('Two-factor authentication enabled'),
+            description: t(
                 'Two-factor authentication is now enabled. Scan the QR code or enter the setup key in your authenticator app.',
-            buttonText: 'Close',
+            ),
+            buttonText: t('Close'),
         };
     }
 
     if (showVerificationStep.value) {
         return {
-            title: 'Verify authentication code',
-            description: 'Enter the 6-digit code from your authenticator app',
-            buttonText: 'Continue',
+            title: t('Verify authentication code'),
+            description: t(
+                'Enter the 6-digit code from your authenticator app',
+            ),
+            buttonText: t('Continue'),
         };
     }
 
     return {
-        title: 'Enable two-factor authentication',
-        description:
+        title: t('Enable two-factor authentication'),
+        description: t(
             'To finish enabling two-factor authentication, scan the QR code or enter the setup key in your authenticator app',
-        buttonText: 'Continue',
+        ),
+        buttonText: t('Continue'),
     };
 });
 
@@ -125,7 +132,7 @@ watch(
                             <div
                                 v-for="i in 5"
                                 :key="`col-${i}`"
-                                class="border-r border-border last:border-r-0"
+                                class="border-e border-border last:border-e-0"
                             />
                         </div>
                         <div
@@ -184,7 +191,7 @@ watch(
                             </div>
                         </div>
 
-                        <div class="flex w-full items-center space-x-5">
+                        <div class="flex w-full items-center gap-5">
                             <Button class="w-full" @click="handleModalNextStep">
                                 {{ modalConfig.buttonText }}
                             </Button>
@@ -196,13 +203,13 @@ watch(
                             <div
                                 class="absolute inset-0 top-1/2 h-px w-full bg-border"
                             />
-                            <span class="relative bg-card px-2 py-1"
-                                >or, enter the code manually</span
-                            >
+                            <span class="relative bg-card px-2 py-1">{{
+                                t('or, enter the code manually')
+                            }}</span>
                         </div>
 
                         <div
-                            class="flex w-full items-center justify-center space-x-2"
+                            class="flex w-full items-center justify-center gap-2"
                         >
                             <div
                                 class="flex w-full items-stretch overflow-hidden rounded-xl border border-border"
@@ -222,7 +229,7 @@ watch(
                                     />
                                     <button
                                         @click="copy(manualSetupKey || '')"
-                                        class="relative block h-auto border-l border-border px-3 hover:bg-muted"
+                                        class="relative block h-auto border-s border-border px-3 hover:bg-muted"
                                     >
                                         <Check
                                             v-if="copied"
@@ -271,7 +278,7 @@ watch(
                                 <InputError :message="errors?.code" />
                             </div>
 
-                            <div class="flex w-full items-center space-x-5">
+                            <div class="flex w-full items-center gap-5">
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -279,14 +286,14 @@ watch(
                                     @click="showVerificationStep = false"
                                     :disabled="processing"
                                 >
-                                    Back
+                                    {{ t('Back') }}
                                 </Button>
                                 <Button
                                     type="submit"
                                     class="w-auto flex-1"
                                     :disabled="processing || code.length < 6"
                                 >
-                                    Confirm
+                                    {{ t('Confirm') }}
                                 </Button>
                             </div>
                         </div>

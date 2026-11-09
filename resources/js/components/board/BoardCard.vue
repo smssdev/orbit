@@ -3,6 +3,9 @@ import { inject } from 'vue';
 import { boardKey } from '@/components/board/boardContext';
 import { cn } from '@/lib/utils';
 import type { BoardTask } from '@/types';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 defineProps<{
     task: BoardTask;
@@ -19,7 +22,7 @@ const board = inject(boardKey)!;
         :data-task-id="task.id"
         :data-pending="task.pending ? '' : undefined"
         :tabindex="task.pending ? -1 : 0"
-        :aria-roledescription="editable ? 'movable card' : 'card'"
+        :aria-roledescription="editable ? t('movable card') : t('card')"
         :aria-describedby="editable ? 'board-instructions' : undefined"
         :aria-busy="task.pending ? 'true' : undefined"
         :class="

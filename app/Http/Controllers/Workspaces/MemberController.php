@@ -70,7 +70,7 @@ class MemberController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __(':name is now :role.', [
             'name' => $member->name,
-            'role' => mb_strtolower($role->label()),
+            'role' => $role->label(),
         ])]);
 
         return back();

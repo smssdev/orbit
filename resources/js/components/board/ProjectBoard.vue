@@ -6,6 +6,9 @@ import { boardKey } from '@/components/board/boardContext';
 import { useBoard } from '@/composables/useBoard';
 import { useSortable } from '@/composables/useSortable';
 import type { BoardColumn as Column } from '@/types';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 const props = defineProps<{
     projectId: number;
@@ -47,10 +50,13 @@ useSortable(list, {
         aria-labelledby="board-heading"
         class="flex min-h-0 flex-1 flex-col"
     >
-        <h2 id="board-heading" class="sr-only">Board</h2>
+        <h2 id="board-heading" class="sr-only">{{ t('Board') }}</h2>
         <p v-if="editable" id="board-instructions" class="sr-only">
-            To move a card with the keyboard, press Space to pick it up, the
-            arrow keys to move it, then Space to drop it, or Escape to cancel.
+            {{
+                t(
+                    'To move a card with the keyboard, press Space to pick it up, the arrow keys to move it, then Space to drop it, or Escape to cancel.',
+                )
+            }}
         </p>
         <div class="sr-only" aria-live="assertive" aria-atomic="true">
             {{ board.announcement.value }}
@@ -74,7 +80,7 @@ useSortable(list, {
                 v-if="columns.length === 0 && !editable"
                 class="text-sm text-muted-foreground"
             >
-                This board has no columns.
+                {{ t('This board has no columns.') }}
             </p>
         </div>
     </section>

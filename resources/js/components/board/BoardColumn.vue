@@ -13,6 +13,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useI18n } from '@/composables/useI18n';
 import { useSortable } from '@/composables/useSortable';
 import { cn } from '@/lib/utils';
 import type { BoardColumn } from '@/types';
@@ -27,6 +28,7 @@ const props = defineProps<{
 }>();
 
 const board = inject(boardKey)!;
+const { t, dir } = useI18n();
 const list = ref<HTMLElement | null>(null);
 const nameInput = ref<HTMLInputElement | null>(null);
 const menuTrigger = ref<InstanceType<typeof Button> | null>(null);
@@ -115,9 +117,9 @@ function remove(): void {
             "
         >
             <form v-if="renaming" class="flex-1" @submit.prevent="saveName">
-                <label :for="`${headingId}-input`" class="sr-only"
-                    >Column name</label
-                >
+                <label :for="`${headingId}-input`" class="sr-only">{{
+                    t('Column name')
+                }}</label>
                 <input
                     :id="`${headingId}-input`"
                     ref="nameInput"
@@ -149,7 +151,9 @@ function remove(): void {
                         variant="ghost"
                         size="icon"
                         class="size-8"
-                        :aria-label="`Actions for ${column.name}`"
+                        :aria-label="
+                            t('Actions for :name', { name: column.name })
+                        "
                     >
                         <Ellipsis />
                     </Button>
@@ -157,26 +161,28 @@ function remove(): void {
                 <DropdownMenuContent align="end" class="w-44">
                     <DropdownMenuItem @select="startRename">
                         <Pencil />
-                        Rename
+                        {{ t('Rename') }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         :disabled="index === 0"
                         @select="move(-1)"
                     >
-                        <ArrowLeft />
-                        Move left
+                        <ArrowRight v-if="dir === 'rtl'" />
+                        <ArrowLeft v-else />
+                        {{ dir === 'rtl' ? t('Move right') : t('Move left') }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         :disabled="index === columns.length - 1"
                         @select="move(1)"
                     >
-                        <ArrowRight />
-                        Move right
+                        <ArrowLeft v-if="dir === 'rtl'" />
+                        <ArrowRight v-else />
+                        {{ dir === 'rtl' ? t('Move left') : t('Move right') }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem variant="destructive" @select="remove">
                         <Trash2 />
-                        Delete
+                        {{ t('Delete') }}
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>

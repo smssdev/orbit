@@ -3,6 +3,9 @@ import { Plus } from '@lucide/vue';
 import { inject, nextTick, ref } from 'vue';
 import { boardKey } from '@/components/board/boardContext';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 const props = defineProps<{
     columnId: number;
@@ -56,9 +59,9 @@ function onBlur(event: FocusEvent): void {
 
 <template>
     <form v-if="open" class="grid gap-2 px-2 pb-2" @submit.prevent="submit">
-        <label :for="`new-card-${columnId}`" class="sr-only"
-            >Title of the new card in {{ columnName }}</label
-        >
+        <label :for="`new-card-${columnId}`" class="sr-only">{{
+            t('Title of the new card in :column', { column: columnName })
+        }}</label>
         <textarea
             :id="`new-card-${columnId}`"
             ref="input"
@@ -66,17 +69,17 @@ function onBlur(event: FocusEvent): void {
             rows="2"
             maxlength="200"
             required
-            placeholder="What needs doing?"
+            :placeholder="t('What needs doing?')"
             class="w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
             @keydown.enter.exact.prevent="submit"
             @keydown.esc.prevent="close"
             @blur="onBlur"
         />
         <div class="flex gap-2">
-            <Button type="submit" size="sm">Add card</Button>
-            <Button type="button" size="sm" variant="ghost" @click="close"
-                >Cancel</Button
-            >
+            <Button type="submit" size="sm">{{ t('Add card') }}</Button>
+            <Button type="button" size="sm" variant="ghost" @click="close">{{
+                t('Cancel')
+            }}</Button>
         </div>
     </form>
     <div v-else class="px-2 pb-2">
@@ -88,7 +91,7 @@ function onBlur(event: FocusEvent): void {
             @click="start"
         >
             <Plus />
-            Add a card
+            {{ t('Add a card') }}
         </Button>
     </div>
 </template>

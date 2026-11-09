@@ -8,6 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { edit } from '@/routes/workspace';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 defineOptions({
     layout: {
@@ -22,7 +25,7 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="Workspace settings" />
+    <Head :title="t('Workspace settings')" />
 
     <div class="max-w-xl space-y-6">
         <Heading
@@ -42,7 +45,7 @@ defineProps<{
             v-slot="{ errors, processing }"
         >
             <div class="grid gap-2">
-                <Label for="name">Workspace name</Label>
+                <Label for="name">{{ t('Workspace name') }}</Label>
                 <Input
                     id="name"
                     name="name"
@@ -61,7 +64,7 @@ defineProps<{
                 data-test="update-workspace-button"
             >
                 <Spinner v-if="processing" />
-                Save
+                {{ t('Save') }}
             </Button>
         </Form>
     </div>

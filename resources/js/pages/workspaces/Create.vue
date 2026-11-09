@@ -16,6 +16,9 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { dashboard } from '@/routes';
 import { create } from '@/routes/workspaces';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 defineOptions({
     layout: {
@@ -28,15 +31,20 @@ const hasWorkspaces = computed(() => page.props.workspaces.length > 0);
 </script>
 
 <template>
-    <Head title="New workspace" />
+    <Head :title="t('New workspace')" />
 
     <div class="flex flex-1 items-start justify-center p-4 md:items-center">
         <Card class="w-full max-w-md">
             <CardHeader>
-                <CardTitle class="text-xl">Create a workspace</CardTitle>
+                <CardTitle class="text-xl">{{
+                    t('Create a workspace')
+                }}</CardTitle>
                 <CardDescription>
-                    A workspace holds your projects and the people you work
-                    with. You can invite teammates once it's set up.
+                    {{
+                        t(
+                            "A workspace holds your projects and the people you work with. You can invite teammates once it's set up.",
+                        )
+                    }}
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -46,14 +54,14 @@ const hasWorkspaces = computed(() => page.props.workspaces.length > 0);
                     v-slot="{ errors, processing }"
                 >
                     <div class="grid gap-2">
-                        <Label for="name">Workspace name</Label>
+                        <Label for="name">{{ t('Workspace name') }}</Label>
                         <Input
                             id="name"
                             name="name"
                             required
                             maxlength="80"
                             autocomplete="organization"
-                            placeholder="e.g. Acme Inc."
+                            :placeholder="t('e.g. Acme Inc.')"
                             v-focus
                         />
                         <InputError :message="errors.name" />
@@ -66,7 +74,7 @@ const hasWorkspaces = computed(() => page.props.workspaces.length > 0);
                             type="button"
                             as-child
                         >
-                            <Link :href="dashboard()">Cancel</Link>
+                            <Link :href="dashboard()">{{ t('Cancel') }}</Link>
                         </Button>
                         <Button
                             type="submit"
@@ -74,7 +82,7 @@ const hasWorkspaces = computed(() => page.props.workspaces.length > 0);
                             data-test="create-workspace-button"
                         >
                             <Spinner v-if="processing" />
-                            Create workspace
+                            {{ t('Create workspace') }}
                         </Button>
                     </div>
                 </Form>

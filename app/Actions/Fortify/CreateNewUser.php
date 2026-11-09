@@ -36,6 +36,9 @@ class CreateNewUser implements CreatesNewUsers
                 'password' => $input['password'],
             ]);
 
+            // Keep the language they signed up in, so later emails (verification, resets) use it too.
+            $user->forceFill(['locale' => app()->getLocale()])->save();
+
             $firstName = Str::before(trim($user->name), ' ');
             $this->createWorkspace->handle($user, __(":name's workspace", ['name' => $firstName]));
 

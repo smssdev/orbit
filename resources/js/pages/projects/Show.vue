@@ -11,6 +11,7 @@ import ProjectFormDialog from '@/components/projects/ProjectFormDialog.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import { useI18n } from '@/composables/useI18n';
 import { fromNow } from '@/lib/workspaces';
 import { index as projectsIndex } from '@/routes/projects';
 import type {
@@ -32,6 +33,8 @@ defineOptions({
         breadcrumbs: [{ title: 'Projects', href: projectsIndex() }],
     },
 });
+
+const { t, locale } = useI18n();
 
 const editing = ref(false);
 const working = ref(false);
@@ -64,9 +67,9 @@ function toggleArchive(): void {
                     <h1 class="truncate text-xl font-semibold tracking-tight">
                         {{ project.name }}
                     </h1>
-                    <Badge v-if="project.archivedAt" variant="secondary"
-                        >Archived</Badge
-                    >
+                    <Badge v-if="project.archivedAt" variant="secondary">{{
+                        t('Archived')
+                    }}</Badge>
                 </div>
                 <p
                     v-if="project.description"
@@ -75,14 +78,14 @@ function toggleArchive(): void {
                     {{ project.description }}
                 </p>
                 <p class="mt-1 text-xs text-muted-foreground">
-                    <template v-if="project.createdBy"
-                        >Created by {{ project.createdBy }}</template
-                    >
+                    <template v-if="project.createdBy">{{
+                        t('Created by :name', { name: project.createdBy })
+                    }}</template>
                     <template v-if="project.createdBy && project.createdAt">
                         ·
                     </template>
                     <template v-if="project.createdAt">{{
-                        fromNow(project.createdAt)
+                        fromNow(project.createdAt, locale.current)
                     }}</template>
                 </p>
             </div>
@@ -95,7 +98,7 @@ function toggleArchive(): void {
                     @click="editing = true"
                 >
                     <Pencil />
-                    Edit
+                    {{ t('Edit') }}
                 </Button>
                 <Button
                     variant="outline"
@@ -106,13 +109,18 @@ function toggleArchive(): void {
                     <Spinner v-if="working" />
                     <ArchiveRestore v-else-if="project.archivedAt" />
                     <Archive v-else />
-                    {{ project.archivedAt ? 'Restore' : 'Archive' }}
+                    {{ project.archivedAt ? t('Restore') : t('Archive') }}
                 </Button>
                 <ConfirmAction
                     v-if="project.can.delete"
-                    title="Delete this project?"
-                    :description="`${project.name} and everything in it will be deleted for everyone. This cannot be undone.`"
-                    confirm-label="Delete project"
+                    :title="t('Delete this project?')"
+                    :description="
+                        t(
+                            ':name and everything in it will be deleted for everyone. This cannot be undone.',
+                            { name: project.name },
+                        )
+                    "
+                    :confirm-label="t('Delete project')"
                     :action="ProjectController.destroy(project.id)"
                 >
                     <Button
@@ -120,7 +128,7 @@ function toggleArchive(): void {
                         data-test="delete-project-button"
                     >
                         <Trash2 />
-                        Delete
+                        {{ t('Delete') }}
                     </Button>
                 </ConfirmAction>
             </div>
@@ -131,8 +139,11 @@ function toggleArchive(): void {
             class="-mt-2 text-sm text-muted-foreground"
             role="note"
         >
-            This project is archived, so its board is read-only. Restore it to
-            make changes.
+            {{
+                t(
+                    'This project is archived, so its board is read-only. Restore it to make changes.',
+                )
+            }}
         </p>
 
         <ProjectBoard

@@ -32,8 +32,10 @@ final class InviteMember
             ],
         );
 
+        // The invitee has no language preference yet, so the email goes out in the inviter's language. The
+        // notification is queued, so the locale is pinned now rather than taken from the worker later.
         Notification::route('mail', $invitation->email)
-            ->notify(new WorkspaceInvitationNotification($invitation, $token));
+            ->notify(new WorkspaceInvitationNotification($invitation, $token)->locale(app()->getLocale()));
 
         return $invitation;
     }

@@ -11,6 +11,9 @@ import WorkspaceAvatar from '@/components/WorkspaceAvatar.vue';
 import { roleLabels } from '@/lib/workspaces';
 import { dashboard, logout } from '@/routes';
 import type { InvitationStatus, WorkspaceRole } from '@/types';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 defineOptions({
     layout: {
@@ -31,21 +34,23 @@ const props = defineProps<{
 
 const page = usePage();
 const signedInAs = computed(() => page.props.auth.user.email);
-const inviter = computed(() => props.invitation.invitedBy ?? 'A teammate');
+const inviter = computed(() => props.invitation.invitedBy ?? t('A teammate'));
 </script>
 
 <template>
-    <Head :title="`Join ${invitation.workspace}`" />
+    <Head :title="t('Join :workspace', { workspace: invitation.workspace })" />
 
     <div class="flex flex-col items-center gap-6 text-center">
         <WorkspaceAvatar :name="invitation.workspace" class="size-14 text-lg" />
 
         <p class="text-sm text-muted-foreground">
-            {{ inviter }} invited you to join
-            <span class="font-semibold text-foreground">{{
-                invitation.workspace
-            }}</span>
-            as {{ roleLabels[invitation.role].toLowerCase() }}.
+            {{
+                t(':inviter invited you to join :workspace as :role.', {
+                    inviter,
+                    workspace: invitation.workspace,
+                    role: t(roleLabels[invitation.role]),
+                })
+            }}
         </p>
 
         <Form
@@ -61,36 +66,43 @@ const inviter = computed(() => props.invitation.invitedBy ?? 'A teammate');
                 data-test="accept-invitation-button"
             >
                 <Spinner v-if="processing" />
-                Join {{ invitation.workspace }}
+                {{ t('Join :workspace', { workspace: invitation.workspace }) }}
             </Button>
-            <TextLink :href="dashboard()" class="text-sm">Not now</TextLink>
+            <TextLink :href="dashboard()" class="text-sm">{{
+                t('Not now')
+            }}</TextLink>
         </Form>
 
         <template v-else-if="status === 'expired'">
-            <Alert variant="destructive" class="text-left">
+            <Alert variant="destructive" class="text-start">
                 <CircleAlert />
-                <AlertTitle>This invitation has expired</AlertTitle>
+                <AlertTitle>{{ t('This invitation has expired') }}</AlertTitle>
                 <AlertDescription>
-                    Ask {{ inviter }} to send you a new one.
+                    {{ t('Ask :inviter to send you a new one.', { inviter }) }}
                 </AlertDescription>
             </Alert>
             <Button variant="secondary" class="w-full" as-child>
-                <Link :href="dashboard()">Go to dashboard</Link>
+                <Link :href="dashboard()">{{ t('Go to dashboard') }}</Link>
             </Button>
         </template>
 
         <template v-else>
-            <Alert class="text-left">
+            <Alert class="text-start">
                 <CircleAlert />
-                <AlertTitle>This invitation is for another account</AlertTitle>
+                <AlertTitle>{{
+                    t('This invitation is for another account')
+                }}</AlertTitle>
                 <AlertDescription>
-                    It was sent to {{ invitation.email }}, but you're signed in
-                    as {{ signedInAs }}. Sign in with the invited address to
-                    accept it.
+                    {{
+                        t(
+                            "It was sent to :email, but you're signed in as :current. Sign in with the invited address to accept it.",
+                            { email: invitation.email, current: signedInAs },
+                        )
+                    }}
                 </AlertDescription>
             </Alert>
             <Button variant="secondary" class="w-full" as-child>
-                <Link :href="logout()" as="button">Log out</Link>
+                <Link :href="logout()" as="button">{{ t('Log out') }}</Link>
             </Button>
         </template>
     </div>

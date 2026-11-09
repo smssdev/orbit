@@ -20,6 +20,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import type { BoardColumn } from '@/types';
+import { useI18n } from '@/composables/useI18n';
+
+const { t, tc } = useI18n();
 
 const props = defineProps<{
     column: BoardColumn;
@@ -58,22 +61,32 @@ function confirm(): void {
     <Dialog v-model:open="open">
         <DialogContent class="sm:max-w-md">
             <DialogHeader class="space-y-3">
-                <DialogTitle>Delete {{ column.name }}?</DialogTitle>
+                <DialogTitle>{{
+                    t('Delete :name?', { name: column.name })
+                }}</DialogTitle>
                 <DialogDescription>
-                    It has {{ count }} {{ count === 1 ? 'card' : 'cards' }}.
+                    {{ tc('It has :count card.|It has :count cards.', count) }}
                     <template v-if="targets.length > 0">
-                        Choose a column to move
-                        {{ count === 1 ? 'it' : 'them' }} to; nothing is lost.
+                        {{
+                            t(
+                                'Choose a column to move them to; nothing is lost.',
+                            )
+                        }}
                     </template>
                     <template v-else>
-                        Add another column first, so its cards have somewhere to
-                        go.
+                        {{
+                            t(
+                                'Add another column first, so its cards have somewhere to go.',
+                            )
+                        }}
                     </template>
                 </DialogDescription>
             </DialogHeader>
 
             <div v-if="targets.length > 0" class="grid gap-2">
-                <Label :for="`move-cards-${column.id}`">Move cards to</Label>
+                <Label :for="`move-cards-${column.id}`">{{
+                    t('Move cards to')
+                }}</Label>
                 <Select v-model="target">
                     <SelectTrigger
                         :id="`move-cards-${column.id}`"
@@ -95,14 +108,14 @@ function confirm(): void {
 
             <DialogFooter class="gap-2">
                 <DialogClose as-child>
-                    <Button variant="secondary">Cancel</Button>
+                    <Button variant="secondary">{{ t('Cancel') }}</Button>
                 </DialogClose>
                 <Button
                     variant="destructive"
                     :disabled="targets.length === 0"
                     @click="confirm"
                 >
-                    Move cards and delete
+                    {{ t('Move cards and delete') }}
                 </Button>
             </DialogFooter>
         </DialogContent>

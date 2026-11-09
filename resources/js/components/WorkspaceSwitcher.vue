@@ -20,6 +20,7 @@ import {
     useSidebar,
 } from '@/components/ui/sidebar';
 import WorkspaceAvatar from '@/components/WorkspaceAvatar.vue';
+import { useI18n } from '@/composables/useI18n';
 import { roleLabels } from '@/lib/workspaces';
 import { dashboard } from '@/routes';
 import { edit as workspaceSettings } from '@/routes/workspace';
@@ -31,6 +32,7 @@ const page = usePage();
 const current = computed(() => page.props.currentWorkspace);
 const workspaces = computed(() => page.props.workspaces);
 const { isMobile } = useSidebar();
+const { t, dir } = useI18n();
 
 function switchTo(workspace: WorkspaceSummary): void {
     if (workspace.id === current.value?.id) {
@@ -62,7 +64,7 @@ function switchTo(workspace: WorkspaceSummary): void {
                     >
                         <WorkspaceAvatar :name="current.name" />
                         <div
-                            class="grid flex-1 text-left text-sm leading-tight"
+                            class="grid flex-1 text-start text-sm leading-tight"
                         >
                             <span class="truncate font-semibold">{{
                                 current.name
@@ -70,23 +72,25 @@ function switchTo(workspace: WorkspaceSummary): void {
                             <span
                                 class="truncate text-xs text-muted-foreground"
                             >
-                                {{ roleLabels[current.role] }}
+                                {{ t(roleLabels[current.role]) }}
                             </span>
                         </div>
-                        <ChevronsUpDown class="ml-auto size-4 opacity-60" />
+                        <ChevronsUpDown class="ms-auto size-4 opacity-60" />
                     </SidebarMenuButton>
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent
                     class="w-(--reka-dropdown-menu-trigger-width) min-w-60 rounded-lg"
-                    :side="isMobile ? 'bottom' : 'right'"
+                    :side="
+                        isMobile ? 'bottom' : dir === 'rtl' ? 'left' : 'right'
+                    "
                     align="start"
                     :side-offset="4"
                 >
                     <DropdownMenuLabel
                         class="text-xs font-normal text-muted-foreground"
                     >
-                        Workspaces
+                        {{ t('Workspaces') }}
                     </DropdownMenuLabel>
                     <DropdownMenuGroup>
                         <DropdownMenuItem
@@ -105,7 +109,7 @@ function switchTo(workspace: WorkspaceSummary): void {
                             <Check
                                 v-if="workspace.id === current.id"
                                 class="size-4"
-                                aria-label="Current workspace"
+                                :aria-label="t('Current workspace')"
                             />
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
@@ -116,13 +120,13 @@ function switchTo(workspace: WorkspaceSummary): void {
                         <DropdownMenuItem as-child>
                             <Link :href="workspaceMembers()" class="gap-2">
                                 <Users class="size-4" />
-                                Members
+                                {{ t('Members') }}
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem as-child>
                             <Link :href="workspaceSettings()" class="gap-2">
                                 <Settings class="size-4" />
-                                Workspace settings
+                                {{ t('Workspace settings') }}
                             </Link>
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
@@ -132,7 +136,7 @@ function switchTo(workspace: WorkspaceSummary): void {
                     <DropdownMenuItem as-child>
                         <Link :href="createWorkspace()" class="gap-2">
                             <Plus class="size-4" />
-                            New workspace
+                            {{ t('New workspace') }}
                         </Link>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
