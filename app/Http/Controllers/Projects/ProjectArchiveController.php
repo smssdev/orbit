@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Projects;
 
 use App\Http\Attributes\CurrentWorkspace;
+use App\Http\Controllers\Concerns\ScopesProjectsToWorkspace;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\Workspace;
@@ -15,6 +16,8 @@ use Inertia\Inertia;
  */
 class ProjectArchiveController extends Controller
 {
+    use ScopesProjectsToWorkspace;
+
     public function store(#[CurrentWorkspace] Workspace $workspace, Project $project): RedirectResponse
     {
         $this->ensureInWorkspace($workspace, $project);
@@ -39,11 +42,5 @@ class ProjectArchiveController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => __(':name is back.', ['name' => $project->name])]);
 
         return to_route('projects.show', $project);
-    }
-
-    private function ensureInWorkspace(Workspace $workspace, Project $project): void
-    {
-        abort_unless($project->workspace_id === $workspace->id, 404);
-        $project->setRelation('workspace', $workspace);
     }
 }

@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Board\ColumnController;
+use App\Http\Controllers\Board\ColumnPositionController;
+use App\Http\Controllers\Board\TaskController;
+use App\Http\Controllers\Board\TaskPositionController;
 use App\Http\Controllers\Projects\ProjectArchiveController;
 use App\Http\Controllers\Projects\ProjectController;
 use App\Http\Controllers\Workspaces\AcceptInvitationController;
@@ -36,6 +40,17 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::delete('projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
         Route::post('projects/{project}/archive', [ProjectArchiveController::class, 'store'])->name('projects.archive');
         Route::delete('projects/{project}/archive', [ProjectArchiveController::class, 'destroy'])->name('projects.restore');
+
+        // The project's board. Columns and cards are looked up within the project, so others answer 404.
+        Route::scopeBindings()->prefix('projects/{project}')->name('projects.')->group(function (): void {
+            Route::post('columns', [ColumnController::class, 'store'])->name('columns.store');
+            Route::patch('columns/{column}', [ColumnController::class, 'update'])->name('columns.update');
+            Route::delete('columns/{column}', [ColumnController::class, 'destroy'])->name('columns.destroy');
+            Route::put('columns/{column}/position', [ColumnPositionController::class, 'update'])->name('columns.position');
+
+            Route::post('columns/{column}/tasks', [TaskController::class, 'store'])->name('tasks.store');
+            Route::put('tasks/{task}/position', [TaskPositionController::class, 'update'])->name('tasks.position');
+        });
     });
 });
 
