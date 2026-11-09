@@ -1,0 +1,94 @@
+name: deploy
+
+# Ships main to the VPS once the tests pass on it (or by hand from the Actions tab).
+# Needs the SSH_HOST, SSH_USER and SSH_KEY secrets that deploy/provision.sh prints; skipped until they exist.
+on:
+  workflow_run:
+    workflows: [tests]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://orbit.smszs.tech
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+
+    steps:
+      - name: Check that the server is set up
+        id: ready
+        run: |
+          if [ -z "$SSH_HOST" ] || [ -z "$SSH_USER" ]; then
+            echo "::warning::Deploy skipped: add the SSH_HOST, SSH_USER and SSH_KEY secrets (see deploy/README.md)."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout code
+        if: steps.ready.outputs.ok == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+
+      - name: Setup PHP
+        if: steps.ready.outputs.ok == 'true'
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        if: steps.ready.outputs.ok == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+
+      - name: Build
+        if: steps.ready.outputs.ok == 'true'
+        run: |
+          composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+          npm ci
+          npm run build
+          rm -rf node_modules
+
+      - name: Upload and activate the release
+        if: steps.ready.outputs.ok == 'true'
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          release="/var/www/orbit/releases/$(date -u +%Y%m%d%H%M%S)-${RELEASE_SHA::7}"
+          ssh="ssh -p $SSH_PORT -o BatchMode=yes"
+
+          $ssh "$SSH_USER@$SSH_HOST" "mkdir -p '$release'"
+          rsync -az --delete -e "$ssh" \
+            --exclude='.git/' --exclude='.github/' --exclude='node_modules/' --exclude='tests/' \
+            --exclude='storage/' --exclude='.env' --exclude='database/database.sqlite' \
+            ./ "$SSH_USER@$SSH_HOST:$release/"
+          $ssh "$SSH_USER@$SSH_HOST" "cd '$release' && bash deploy/activate.sh"
+
+      - name: Check the site answers
+        if: steps.ready.outputs.ok == 'true'
+        run: curl --fail --silent --show-error --retry 5 --retry-delay 3 --retry-all-errors -o /dev/null https://orbit.smszs.tech/up
