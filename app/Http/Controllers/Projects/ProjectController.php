@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Projects;
 use App\Enums\ProjectColor;
 use App\Enums\ProjectIcon;
 use App\Http\Attributes\CurrentWorkspace;
+use App\Http\Controllers\Concerns\ScopesProjectsToWorkspace;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Projects\SaveProjectRequest;
 use App\Models\Project;
@@ -19,6 +20,8 @@ use Inertia\Response;
 
 class ProjectController extends Controller
 {
+    use ScopesProjectsToWorkspace;
+
     public function index(Request $request, #[CurrentWorkspace] Workspace $workspace, #[CurrentUser] User $user): Response
     {
         $archived = $request->query('filter') === 'archived';
@@ -69,8 +72,10 @@ class ProjectController extends Controller
                 'can' => [
                     'update' => $user->can('update', $project),
                     'delete' => $user->can('delete', $project),
+                    'editBoard' => $user->can('editBoard', $project),
                 ],
             ],
+            'columns' => $project->board(...),
             'colors' => ProjectColor::cases(),
             'icons' => ProjectIcon::cases(),
         ]);
@@ -98,14 +103,5 @@ class ProjectController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => __(':name was deleted.', ['name' => $project->name])]);
 
         return to_route('projects.index', ['filter' => 'archived']);
-    }
-
-    /**
-     * Projects are addressed by ID, so one from another workspace answers as if it did not exist.
-     */
-    private function ensureInWorkspace(Workspace $workspace, Project $project): void
-    {
-        abort_unless($project->workspace_id === $workspace->id, 404);
-        $project->setRelation('workspace', $workspace);
     }
 }

@@ -36,7 +36,8 @@ export type ProjectSummary = ProjectLink & {
     can: { update: boolean; delete: boolean };
 };
 
-export type ProjectDetails = ProjectSummary & {
+export type ProjectDetails = Omit<ProjectSummary, 'can'> & {
     createdBy: string | null;
     createdAt: string | null;
+    can: ProjectSummary['can'] & { editBoard: boolean };
 };

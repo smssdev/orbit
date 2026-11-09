@@ -4,21 +4,8 @@ use App\Enums\ProjectColor;
 use App\Enums\ProjectIcon;
 use App\Enums\WorkspaceRole;
 use App\Models\Project;
-use App\Models\User;
 use App\Models\Workspace;
 use Inertia\Testing\AssertableInertia;
-
-/**
- * A user in the workspace with the given role, switched into it.
- */
-function projectMember(Workspace $workspace, WorkspaceRole $role = WorkspaceRole::Member): User
-{
-    $user = User::factory()->create();
-    $workspace->addMember($user, $role);
-    $user->switchWorkspace($workspace);
-
-    return $user;
-}
 
 /**
  * @return array<string, string>

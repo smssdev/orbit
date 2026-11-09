@@ -170,3 +170,13 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* Drag and drop on the board (SortableJS): the gap where the item lands, and the copy under the pointer. */
+@layer components {
+    .sortable-ghost {
+        @apply opacity-40;
+    }
+    .sortable-drag {
+        @apply rotate-2 cursor-grabbing shadow-lg;
+    }
+}

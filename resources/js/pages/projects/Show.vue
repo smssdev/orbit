@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { Archive, ArchiveRestore, Columns3, Pencil, Trash2 } from '@lucide/vue';
+import { Archive, ArchiveRestore, Pencil, Trash2 } from '@lucide/vue';
 import { ref } from 'vue';
 import ProjectArchiveController from '@/actions/App/Http/Controllers/Projects/ProjectArchiveController';
 import ProjectController from '@/actions/App/Http/Controllers/Projects/ProjectController';
+import ProjectBoard from '@/components/board/ProjectBoard.vue';
 import ConfirmAction from '@/components/ConfirmAction.vue';
 import ProjectBadge from '@/components/projects/ProjectBadge.vue';
 import ProjectFormDialog from '@/components/projects/ProjectFormDialog.vue';
@@ -12,10 +13,16 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { fromNow } from '@/lib/workspaces';
 import { index as projectsIndex } from '@/routes/projects';
-import type { ProjectColor, ProjectDetails, ProjectIcon } from '@/types';
+import type {
+    BoardColumn,
+    ProjectColor,
+    ProjectDetails,
+    ProjectIcon,
+} from '@/types';
 
 const props = defineProps<{
     project: ProjectDetails;
+    columns: BoardColumn[];
     colors: ProjectColor[];
     icons: ProjectIcon[];
 }>();
@@ -119,17 +126,20 @@ function toggleArchive(): void {
             </div>
         </header>
 
-        <section
-            class="flex flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-6 py-16 text-center"
-            aria-labelledby="board-heading"
+        <p
+            v-if="project.archivedAt"
+            class="-mt-2 text-sm text-muted-foreground"
+            role="note"
         >
-            <Columns3 class="size-10 text-muted-foreground" />
-            <h2 id="board-heading" class="font-medium">The board comes next</h2>
-            <p class="max-w-sm text-sm text-muted-foreground">
-                Columns and cards you can drag between them arrive in the next
-                update of Orbit.
-            </p>
-        </section>
+            This project is archived, so its board is read-only. Restore it to
+            make changes.
+        </p>
+
+        <ProjectBoard
+            :project-id="project.id"
+            :columns="columns"
+            :editable="project.can.editBoard"
+        />
     </div>
 
     <ProjectFormDialog
