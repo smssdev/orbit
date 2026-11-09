@@ -11,9 +11,9 @@ enum WorkspaceRole: string
     public function label(): string
     {
         return match ($this) {
-            self::Owner => 'Owner',
-            self::Admin => 'Admin',
-            self::Member => 'Member',
+            self::Owner => __('Owner'),
+            self::Admin => __('Admin'),
+            self::Member => __('Member'),
         };
     }
 

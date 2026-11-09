@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import {
-    BookOpen,
-    FolderGit2,
-    FolderKanban,
-    LayoutGrid,
-    Users,
-} from '@lucide/vue';
-import NavFooter from '@/components/NavFooter.vue';
+import { FolderKanban, LayoutGrid, Users } from '@lucide/vue';
 import NavMain from '@/components/NavMain.vue';
 import NavProjects from '@/components/projects/NavProjects.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -17,6 +10,7 @@ import {
     SidebarHeader,
 } from '@/components/ui/sidebar';
 import WorkspaceSwitcher from '@/components/WorkspaceSwitcher.vue';
+import { useI18n } from '@/composables/useI18n';
 import { dashboard } from '@/routes';
 import { index as projectsIndex } from '@/routes/projects';
 import { index as workspaceMembers } from '@/routes/workspace/members';
@@ -40,22 +34,16 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
-];
+// The sidebar sits on the reading side: left in English, right in Arabic.
+const { dir } = useI18n();
 </script>
 
 <template>
-    <Sidebar collapsible="icon" variant="inset">
+    <Sidebar
+        collapsible="icon"
+        variant="inset"
+        :side="dir === 'rtl' ? 'right' : 'left'"
+    >
         <SidebarHeader>
             <WorkspaceSwitcher />
         </SidebarHeader>
@@ -66,7 +54,6 @@ const footerNavItems: NavItem[] = [
         </SidebarContent>
 
         <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
             <NavUser />
         </SidebarFooter>
     </Sidebar>

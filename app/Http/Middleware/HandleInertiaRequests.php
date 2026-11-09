@@ -8,6 +8,7 @@ use App\Enums\WorkspaceRole;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Support\Locales;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -44,6 +45,13 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'locale' => fn (): array => [
+                'current' => app()->getLocale(),
+                'dir' => Locales::direction(app()->getLocale()),
+                'available' => Locales::options(),
+            ],
+            // Strings for t() on the frontend; the key is the English text (lang/{locale}.json).
+            'translations' => fn (): array => Locales::translations(app()->getLocale()),
             'auth' => [
                 'user' => $request->user(),
             ],

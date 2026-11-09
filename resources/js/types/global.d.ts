@@ -1,4 +1,5 @@
 import type { Directive } from 'vue';
+import type { LocaleProps } from '@/composables/useI18n';
 import type { Auth } from '@/types/auth';
 import type { ProjectLink } from '@/types/project';
 import type { WorkspaceSummary } from '@/types/workspace';
@@ -25,6 +26,8 @@ declare module '@inertiajs/core' {
             workspaces: WorkspaceSummary[];
             currentWorkspace: WorkspaceSummary | null;
             projects: ProjectLink[];
+            locale: LocaleProps;
+            translations: Record<string, string>;
             [key: string]: unknown;
         };
     }

@@ -8,6 +8,9 @@ import {
 } from '@/components/ui/select';
 import { roleDescriptions, roleLabels } from '@/lib/workspaces';
 import type { WorkspaceRole } from '@/types';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 defineProps<{
     roles: WorkspaceRole[];
@@ -30,9 +33,9 @@ const role = defineModel<WorkspaceRole>({ required: true });
                 v-for="option in roles"
                 :key="option"
                 :value="option"
-                :title="roleDescriptions[option]"
+                :title="t(roleDescriptions[option])"
             >
-                {{ roleLabels[option] }}
+                {{ t(roleLabels[option]) }}
             </SelectItem>
         </SelectContent>
     </Select>

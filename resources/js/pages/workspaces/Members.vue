@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import InviteMemberForm from '@/components/workspaces/InviteMemberForm.vue';
 import RoleSelect from '@/components/workspaces/RoleSelect.vue';
+import { useI18n } from '@/composables/useI18n';
 import { getInitials } from '@/composables/useInitials';
 import { fromNow, roleLabels } from '@/lib/workspaces';
 import { index } from '@/routes/workspace/members';
@@ -78,13 +79,17 @@ function resend(invitation: PendingInvitation): void {
     );
 }
 
+const { t, tc, locale } = useI18n();
+
 const memberCount = computed(() =>
-    props.members.length === 1 ? '1 member' : `${props.members.length} members`,
+    tc(':count member|:count members', props.members.length),
 );
+
+const ago = (iso: string): string => fromNow(iso, locale.value.current);
 </script>
 
 <template>
-    <Head title="Members" />
+    <Head :title="t('Members')" />
 
     <div v-if="canManageMembers" class="space-y-4">
         <Heading
@@ -114,23 +119,28 @@ const memberCount = computed(() =>
                     <p class="flex items-center gap-2 text-sm font-medium">
                         <span class="truncate">{{ member.name }}</span>
                         <Badge v-if="member.isYou" variant="secondary">
-                            You
+                            {{ t('You') }}
                         </Badge>
                     </p>
                     <p class="truncate text-xs text-muted-foreground">
                         {{ member.email }}
                         <template v-if="member.joinedAt">
-                            · joined {{ fromNow(member.joinedAt) }}
+                            ·
+                            {{
+                                t('joined :time', {
+                                    time: ago(member.joinedAt),
+                                })
+                            }}
                         </template>
                     </p>
                 </div>
 
-                <div class="ml-auto flex items-center gap-1">
+                <div class="ms-auto flex items-center gap-1">
                     <RoleSelect
                         v-if="canChangeRole(member)"
                         :model-value="roles[member.id] ?? member.role"
                         :roles="assignableRoles"
-                        :label="`Role for ${member.name}`"
+                        :label="t('Role for :name', { name: member.name })"
                         @update:model-value="changeRole(member, $event)"
                     />
                     <Badge
@@ -139,33 +149,44 @@ const memberCount = computed(() =>
                             member.role === 'owner' ? 'default' : 'outline'
                         "
                     >
-                        {{ roleLabels[member.role] }}
+                        {{ t(roleLabels[member.role]) }}
                     </Badge>
 
                     <ConfirmAction
                         v-if="member.can.remove && member.isYou"
-                        title="Leave this workspace?"
-                        description="You'll lose access to its projects until someone invites you again."
-                        confirm-label="Leave workspace"
+                        :title="t('Leave this workspace?')"
+                        :description="
+                            t(
+                                'You\'ll lose access to its projects until someone invites you again.',
+                            )
+                        "
+                        :confirm-label="t('Leave workspace')"
                         :action="MemberController.destroy(member.id)"
                     >
                         <Button variant="ghost" size="sm">
                             <LogOut />
-                            Leave
+                            {{ t('Leave') }}
                         </Button>
                     </ConfirmAction>
 
                     <ConfirmAction
                         v-else-if="member.can.remove"
-                        :title="`Remove ${member.name}?`"
-                        :description="`${member.name} will lose access to this workspace and its projects.`"
-                        confirm-label="Remove member"
+                        :title="t('Remove :name?', { name: member.name })"
+                        :description="
+                            t(
+                                ':name will lose access to this workspace and its projects.',
+                                { name: member.name },
+                            )
+                        "
+                        :confirm-label="t('Remove member')"
                         :action="MemberController.destroy(member.id)"
                     >
                         <Button
                             variant="ghost"
                             size="icon"
-                            :aria-label="`Remove ${member.name}`"
+                            :aria-label="
+                                t('Remove :name', { name: member.name })
+                            "
                         >
                             <UserMinus />
                         </Button>
@@ -187,7 +208,9 @@ const memberCount = computed(() =>
             class="flex flex-col items-center gap-2 rounded-lg border border-dashed p-8 text-center"
         >
             <MailPlus class="size-6 text-muted-foreground" />
-            <p class="text-sm text-muted-foreground">No pending invitations.</p>
+            <p class="text-sm text-muted-foreground">
+                {{ t('No pending invitations.') }}
+            </p>
         </div>
 
         <ul
@@ -206,23 +229,36 @@ const memberCount = computed(() =>
                     </p>
                     <p class="text-xs text-muted-foreground">
                         <template v-if="invitation.invitedBy">
-                            Invited by {{ invitation.invitedBy }} ·
+                            {{
+                                t('Invited by :name', {
+                                    name: invitation.invitedBy,
+                                })
+                            }}
+                            ·
                         </template>
                         <span
                             v-if="invitation.isExpired"
                             class="text-destructive"
                         >
-                            Expired {{ fromNow(invitation.expiresAt) }}
+                            {{
+                                t('Expired :time', {
+                                    time: ago(invitation.expiresAt),
+                                })
+                            }}
                         </span>
                         <template v-else>
-                            Expires {{ fromNow(invitation.expiresAt) }}
+                            {{
+                                t('Expires :time', {
+                                    time: ago(invitation.expiresAt),
+                                })
+                            }}
                         </template>
                     </p>
                 </div>
 
-                <div class="ml-auto flex items-center gap-1">
+                <div class="ms-auto flex items-center gap-1">
                     <Badge variant="outline">
-                        {{ roleLabels[invitation.role] }}
+                        {{ t(roleLabels[invitation.role]) }}
                     </Badge>
                     <Button
                         variant="ghost"
@@ -235,18 +271,26 @@ const memberCount = computed(() =>
                                 'animate-spin': resending === invitation.id,
                             }"
                         />
-                        Resend
+                        {{ t('Resend') }}
                     </Button>
                     <ConfirmAction
-                        title="Revoke this invitation?"
-                        :description="`The link sent to ${invitation.email} will stop working.`"
-                        confirm-label="Revoke"
+                        :title="t('Revoke this invitation?')"
+                        :description="
+                            t('The link sent to :email will stop working.', {
+                                email: invitation.email,
+                            })
+                        "
+                        :confirm-label="t('Revoke')"
                         :action="InvitationController.destroy(invitation.id)"
                     >
                         <Button
                             variant="ghost"
                             size="icon"
-                            :aria-label="`Revoke the invitation for ${invitation.email}`"
+                            :aria-label="
+                                t('Revoke the invitation for :email', {
+                                    email: invitation.email,
+                                })
+                            "
                         >
                             <X />
                         </Button>

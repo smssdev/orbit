@@ -14,6 +14,9 @@ import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { projectColors } from '@/lib/projects';
 import { cn } from '@/lib/utils';
 import { index as projectsIndex, show as showProject } from '@/routes/projects';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 // The current workspace's active projects, shared by the server on every page.
 const page = usePage();
@@ -26,14 +29,14 @@ const { isCurrentUrl } = useCurrentUrl();
         v-if="page.props.currentWorkspace"
         class="px-2 py-0 group-data-[collapsible=icon]:hidden"
     >
-        <SidebarGroupLabel>Projects</SidebarGroupLabel>
-        <SidebarGroupAction as-child title="New project">
+        <SidebarGroupLabel>{{ t('Projects') }}</SidebarGroupLabel>
+        <SidebarGroupAction as-child :title="t('New project')">
             <Link
                 :href="projectsIndex({ query: { new: 1 } })"
                 data-test="sidebar-new-project"
             >
                 <Plus />
-                <span class="sr-only">New project</span>
+                <span class="sr-only">{{ t('New project') }}</span>
             </Link>
         </SidebarGroupAction>
         <SidebarMenu>
@@ -62,7 +65,7 @@ const { isCurrentUrl } = useCurrentUrl();
             </SidebarMenuItem>
             <SidebarMenuItem v-if="!projects.length">
                 <p class="px-2 py-1.5 text-xs text-muted-foreground">
-                    No projects yet
+                    {{ t('No projects yet') }}
                 </p>
             </SidebarMenuItem>
         </SidebarMenu>

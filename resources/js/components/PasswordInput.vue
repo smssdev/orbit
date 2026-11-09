@@ -4,6 +4,9 @@ import { ref, useTemplateRef } from 'vue';
 import type { HTMLAttributes } from 'vue';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 defineOptions({ inheritAttrs: false });
 
@@ -27,7 +30,7 @@ defineExpose({
             v-focus="props.autofocus"
             ref="inputRef"
             :type="showPassword ? 'text' : 'password'"
-            :class="cn('pr-10', props.class)"
+            :class="cn('pe-10', props.class)"
             v-bind="$attrs"
         />
         <button
@@ -35,10 +38,10 @@ defineExpose({
             @click="showPassword = !showPassword"
             :class="
                 cn(
-                    'absolute inset-y-0 right-0 flex items-center rounded-r-md px-3 text-muted-foreground hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none',
+                    'absolute inset-y-0 end-0 flex items-center rounded-e-md px-3 text-muted-foreground hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none',
                 )
             "
-            :aria-label="showPassword ? 'Hide password' : 'Show password'"
+            :aria-label="showPassword ? t('Hide password') : t('Show password')"
             :tabindex="-1"
         >
             <EyeOff v-if="showPassword" class="size-4" />

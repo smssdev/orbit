@@ -9,6 +9,9 @@ import { toUrl } from '@/lib/utils';
 import { edit as workspaceSettings } from '@/routes/workspace';
 import { index as workspaceMembers } from '@/routes/workspace/members';
 import type { NavItem } from '@/types';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 const page = usePage();
 const workspaceName = computed(() => page.props.currentWorkspace?.name ?? '');
@@ -28,9 +31,12 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
             description="Manage this workspace and the people in it"
         />
 
-        <div class="flex flex-col lg:flex-row lg:space-x-12">
+        <div class="flex flex-col lg:flex-row lg:gap-12">
             <aside class="w-full max-w-xl lg:w-48">
-                <nav class="flex flex-col space-y-1" aria-label="Workspace">
+                <nav
+                    class="flex flex-col space-y-1"
+                    :aria-label="t('Workspace')"
+                >
                     <Button
                         v-for="item in navItems"
                         :key="toUrl(item.href)"
@@ -41,7 +47,7 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
                         ]"
                         as-child
                     >
-                        <Link :href="item.href">{{ item.title }}</Link>
+                        <Link :href="item.href">{{ t(item.title) }}</Link>
                     </Button>
                 </nav>
             </aside>

@@ -20,6 +20,9 @@ import { Spinner } from '@/components/ui/spinner';
 import { projectColors, projectIcons } from '@/lib/projects';
 import { cn } from '@/lib/utils';
 import type { ProjectColor, ProjectIcon, ProjectSummary } from '@/types';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 const props = defineProps<{
     /** The project to edit; none to create one. */
@@ -75,13 +78,15 @@ function submit(): void {
             <form class="space-y-6" @submit.prevent="submit">
                 <DialogHeader>
                     <DialogTitle>{{
-                        editing ? 'Edit project' : 'New project'
+                        editing ? t('Edit project') : t('New project')
                     }}</DialogTitle>
                     <DialogDescription>
                         {{
                             editing
-                                ? 'Changes show for everyone in the workspace.'
-                                : 'Everyone in the workspace can see it.'
+                                ? t(
+                                      'Changes show for everyone in the workspace.',
+                                  )
+                                : t('Everyone in the workspace can see it.')
                         }}
                     </DialogDescription>
                 </DialogHeader>
@@ -93,13 +98,13 @@ function submit(): void {
                         size="lg"
                     />
                     <div class="grid flex-1 gap-2">
-                        <Label for="project-name">Name</Label>
+                        <Label for="project-name">{{ t('Name') }}</Label>
                         <Input
                             id="project-name"
                             v-model="form.name"
                             required
                             maxlength="80"
-                            placeholder="Website relaunch"
+                            :placeholder="t('Website relaunch')"
                             autocomplete="off"
                             data-test="project-name"
                         />
@@ -109,9 +114,9 @@ function submit(): void {
 
                 <div class="grid gap-2">
                     <Label for="project-description">
-                        Description
+                        {{ t('Description') }}
                         <span class="font-normal text-muted-foreground"
-                            >(optional)</span
+                            >({{ t('optional') }})</span
                         >
                     </Label>
                     <textarea
@@ -120,13 +125,15 @@ function submit(): void {
                         rows="3"
                         maxlength="500"
                         class="w-full resize-none rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30"
-                        placeholder="What is this project about?"
+                        :placeholder="t('What is this project about?')"
                     />
                     <InputError :message="form.errors.description" />
                 </div>
 
                 <fieldset class="grid gap-2">
-                    <legend class="mb-2 text-sm font-medium">Colour</legend>
+                    <legend class="mb-2 text-sm font-medium">
+                        {{ t('Colour') }}
+                    </legend>
                     <div class="flex flex-wrap gap-2">
                         <label
                             v-for="color in colors"
@@ -146,7 +153,7 @@ function submit(): void {
                                 class="sr-only"
                             />
                             <span class="sr-only">{{
-                                projectColors[color].label
+                                t(projectColors[color].label)
                             }}</span>
                             <Check
                                 v-if="form.color === color"
@@ -158,7 +165,9 @@ function submit(): void {
                 </fieldset>
 
                 <fieldset class="grid gap-2">
-                    <legend class="mb-2 text-sm font-medium">Icon</legend>
+                    <legend class="mb-2 text-sm font-medium">
+                        {{ t('Icon') }}
+                    </legend>
                     <div class="grid grid-cols-5 gap-2">
                         <label
                             v-for="icon in icons"
@@ -195,7 +204,7 @@ function submit(): void {
                         variant="secondary"
                         @click="open = false"
                     >
-                        Cancel
+                        {{ t('Cancel') }}
                     </Button>
                     <Button
                         type="submit"
@@ -203,7 +212,7 @@ function submit(): void {
                         data-test="save-project-button"
                     >
                         <Spinner v-if="form.processing" />
-                        {{ editing ? 'Save' : 'Create project' }}
+                        {{ editing ? t('Save') : t('Create project') }}
                     </Button>
                 </DialogFooter>
             </form>

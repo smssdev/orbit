@@ -11,6 +11,9 @@ import { Spinner } from '@/components/ui/spinner';
 import RoleSelect from '@/components/workspaces/RoleSelect.vue';
 import { roleDescriptions } from '@/lib/workspaces';
 import type { WorkspaceRole } from '@/types';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 const props = defineProps<{
     roles: WorkspaceRole[];
@@ -29,7 +32,7 @@ const role = ref<WorkspaceRole>(props.roles.at(-1) ?? 'member');
         class="space-y-2"
         v-slot="{ errors, processing }"
     >
-        <Label for="invite-email">Invite by email</Label>
+        <Label for="invite-email">{{ t('Invite by email') }}</Label>
         <div class="flex flex-col gap-2 sm:flex-row">
             <Input
                 id="invite-email"
@@ -45,7 +48,7 @@ const role = ref<WorkspaceRole>(props.roles.at(-1) ?? 'member');
                 v-model="role"
                 name="role"
                 :roles="roles"
-                label="Role for the invited person"
+                :label="t('Role for the invited person')"
             />
             <Button
                 type="submit"
@@ -54,13 +57,13 @@ const role = ref<WorkspaceRole>(props.roles.at(-1) ?? 'member');
             >
                 <Spinner v-if="processing" />
                 <Send v-else />
-                Send invite
+                {{ t('Send invite') }}
             </Button>
         </div>
         <InputError :message="errors.email ?? errors.role" />
         <p class="text-xs text-muted-foreground">
-            {{ roleDescriptions[role] }}. The invitation link expires after 7
-            days.
+            {{ t(roleDescriptions[role]) }}.
+            {{ t('The invitation link expires after 7 days.') }}
         </p>
     </Form>
 </template>

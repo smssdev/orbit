@@ -13,6 +13,7 @@ import ColumnController from '@/actions/App/Http/Controllers/Board/ColumnControl
 import ColumnPositionController from '@/actions/App/Http/Controllers/Board/ColumnPositionController';
 import TaskController from '@/actions/App/Http/Controllers/Board/TaskController';
 import TaskPositionController from '@/actions/App/Http/Controllers/Board/TaskPositionController';
+import { useI18n } from '@/composables/useI18n';
 import {
     clamp,
     locateTask,
@@ -51,6 +52,7 @@ type Lift = {
 export function useBoard(options: Options) {
     const lift = ref<Lift | null>(null);
     const announcement = ref('');
+    const { t, dir } = useI18n();
 
     const columns = computed<BoardColumn[]>(() => {
         const board = options.columns();
@@ -88,7 +90,7 @@ export function useBoard(options: Options) {
             onError: (errors) => {
                 const message =
                     Object.values(errors)[0] ??
-                    'That change could not be saved.';
+                    t('That change could not be saved.');
                 toast.error(message);
                 announce(message);
 
@@ -98,10 +100,12 @@ export function useBoard(options: Options) {
             onHttpException: (response) => {
                 const message =
                     response.status === 403
-                        ? 'This board is read-only now.'
+                        ? t('This board is read-only now.')
                         : response.status === 404
-                          ? 'That is no longer on the board.'
-                          : 'That change could not be saved. Please try again.';
+                          ? t('That is no longer on the board.')
+                          : t(
+                                'That change could not be saved. Please try again.',
+                            );
                 toast.error(message);
                 announce(message);
 
@@ -110,7 +114,9 @@ export function useBoard(options: Options) {
                 return false;
             },
             onNetworkError: () => {
-                toast.error('You seem to be offline. That change was undone.');
+                toast.error(
+                    t('You seem to be offline. That change was undone.'),
+                );
 
                 return false;
             },
@@ -135,7 +141,11 @@ export function useBoard(options: Options) {
 
         const column = board[at.column];
 
-        return `${column.name}, position ${at.index + 1} of ${column.tasks.length}`;
+        return t(':column, position :position of :total', {
+            column: column.name,
+            position: at.index + 1,
+            total: column.tasks.length,
+        });
     }
 
     // Columns
@@ -160,7 +170,7 @@ export function useBoard(options: Options) {
 
     /** Deletes a column; its cards, if any, go to the end of `moveTo`. */
     function deleteColumn(columnId: number, moveTo: number | null): void {
-        const name = columnOf(columnId)?.name ?? 'The column';
+        const name = columnOf(columnId)?.name ?? t('The column');
 
         send(
             ColumnController.destroy([options.projectId(), columnId]),
@@ -178,7 +188,7 @@ export function useBoard(options: Options) {
                     );
             },
         );
-        announce(`${name} was deleted.`);
+        announce(t(':name was deleted.', { name }));
     }
 
     /** Moves a column to `index` of the board (counted without it). */
@@ -198,7 +208,11 @@ export function useBoard(options: Options) {
             (current) => withColumnMoved(current, columnId, to),
         );
         announce(
-            `${column.name} moved to position ${to + 1} of ${board.length}.`,
+            t(':name moved to position :position of :total.', {
+                name: column.name,
+                position: to + 1,
+                total: board.length,
+            }),
         );
     }
 
@@ -262,7 +276,12 @@ export function useBoard(options: Options) {
         const moved = moveTask(taskId, columnId, index);
 
         if (moved) {
-            announce(`${title} moved to ${describe(moved, taskId)}.`);
+            announce(
+                t(':title moved to :place.', {
+                    title,
+                    place: describe(moved, taskId),
+                }),
+            );
         }
     }
 
@@ -298,7 +317,10 @@ export function useBoard(options: Options) {
             index: at.index,
         };
         announce(
-            `Picked up ${titleOf(taskId)}, in ${describe(board, taskId)}. Use the arrow keys to move it, Space to drop it, Escape to cancel.`,
+            t(
+                'Picked up :title, in :place. Use the arrow keys to move it, Space to drop it, Escape to cancel.',
+                { title: titleOf(taskId), place: describe(board, taskId) },
+            ),
         );
     }
 
@@ -312,7 +334,10 @@ export function useBoard(options: Options) {
         const moved = moveTask(taskId, columnId, index);
 
         announce(
-            `Dropped ${title} in ${describe(moved ?? options.columns(), taskId)}.`,
+            t('Dropped :title in :place.', {
+                title,
+                place: describe(moved ?? options.columns(), taskId),
+            }),
         );
 
         if (!moved) {
@@ -343,7 +368,10 @@ export function useBoard(options: Options) {
         const { taskId } = lift.value;
         lift.value = null;
         announce(
-            `Move cancelled. ${titleOf(taskId)} is back in ${describe(columns.value, taskId)}.`,
+            t('Move cancelled. :title is back in :place.', {
+                title: titleOf(taskId),
+                place: describe(columns.value, taskId),
+            }),
         );
         focusTask(taskId);
     }
@@ -371,7 +399,10 @@ export function useBoard(options: Options) {
             index: clamp(lift.value.index + indexStep, 0, siblings.length),
         };
         announce(
-            `${titleOf(lift.value.taskId)}: ${describe(columns.value, lift.value.taskId)}.`,
+            t(':title: :place.', {
+                title: titleOf(lift.value.taskId),
+                place: describe(columns.value, lift.value.taskId),
+            }),
         );
         focusTask(lift.value.taskId);
     }
@@ -382,6 +413,8 @@ export function useBoard(options: Options) {
         }
 
         const lifted = lift.value?.taskId === taskId;
+        // Columns run right to left in Arabic, so the arrow keys follow what the eye sees.
+        const forward = dir.value === 'rtl' ? -1 : 1;
         const actions: Record<string, () => void> = lifted
             ? {
                   ' ': drop,
@@ -389,8 +422,8 @@ export function useBoard(options: Options) {
                   Escape: cancel,
                   ArrowUp: () => step(0, -1),
                   ArrowDown: () => step(0, 1),
-                  ArrowLeft: () => step(-1, 0),
-                  ArrowRight: () => step(1, 0),
+                  ArrowLeft: () => step(-forward, 0),
+                  ArrowRight: () => step(forward, 0),
               }
             : { ' ': () => pickUp(taskId) };
         const action = actions[event.key];
