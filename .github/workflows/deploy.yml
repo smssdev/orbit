@@ -27,6 +27,7 @@ jobs:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+      APP_DIR: ${{ vars.APP_DIR || '/var/www/orbit' }}
 
     steps:
       - name: Check that the server is set up
@@ -79,7 +80,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-          release="/var/www/orbit/releases/$(date -u +%Y%m%d%H%M%S)-${RELEASE_SHA::7}"
+          release="$APP_DIR/releases/$(date -u +%Y%m%d%H%M%S)-${RELEASE_SHA::7}"
           ssh="ssh -p $SSH_PORT -o BatchMode=yes"
 
           $ssh "$SSH_USER@$SSH_HOST" "mkdir -p '$release'"
@@ -87,7 +88,7 @@ jobs:
             --exclude='.git/' --exclude='.github/' --exclude='node_modules/' --exclude='tests/' \
             --exclude='storage/' --exclude='.env' --exclude='database/database.sqlite' \
             ./ "$SSH_USER@$SSH_HOST:$release/"
-          $ssh "$SSH_USER@$SSH_HOST" "cd '$release' && bash deploy/activate.sh"
+          $ssh "$SSH_USER@$SSH_HOST" "cd '$release' && APP_DIR='$APP_DIR' bash deploy/activate.sh"
 
       - name: Check the site answers
         if: steps.ready.outputs.ok == 'true'
