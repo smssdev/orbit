@@ -25,7 +25,7 @@ const features = [
 </script>
 
 <template>
-    <Head title="Orbit" />
+    <Head />
 
     <div class="flex min-h-screen flex-col bg-background text-foreground">
         <header
