@@ -40,7 +40,10 @@ site, which clash with CloudPanel's packages and the sites already there. The pr
    `sudo systemctl reload php8.4-fpm` (`/etc/sudoers.d/orbit-deploy`), and runs the scheduler from its crontab.
 4. GitHub: secrets `SSH_HOST`, `SSH_USER` (`orbit`), `SSH_KEY`, and the repository **variable**
    `APP_DIR` = `/home/orbit/htdocs/orbit.smszs.tech`.
-5. HTTPS: `clpctl lets-encrypt:install:certificate --domainName=orbit.smszs.tech` once DNS points at the server.
+5. Vhost (CloudPanel → Sites → orbit.smszs.tech → Vhost): the backend listens on `127.0.0.1:8091` and the HTTPS
+   server proxies to it (`proxy_pass http://127.0.0.1:8091;`), with Varnish off. The template's default port 8080
+   is taken by the `legends-app` Docker container on this server, so keep 8091 if you edit the vhost.
+6. HTTPS: `clpctl lets-encrypt:install:certificate --domainName=orbit.smszs.tech` once DNS points at the server.
 
 Paths below use `/var/www/orbit`; on CloudPanel read them as `/home/orbit/htdocs/orbit.smszs.tech`.
 
