@@ -5,7 +5,8 @@
 # atomic step and keeps the last five releases for rollbacks.
 set -euo pipefail
 
-APP_DIR=/var/www/orbit
+# Set by the deploy workflow from the APP_DIR repository variable (CloudPanel: /home/<site user>/htdocs/<domain>).
+APP_DIR="${APP_DIR:-/var/www/orbit}"
 RELEASE="$(pwd -P)"
 PHP=8.4
 
