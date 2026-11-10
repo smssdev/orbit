@@ -2,10 +2,17 @@
 import { computed, provide, ref } from 'vue';
 import AddColumnForm from '@/components/board/AddColumnForm.vue';
 import BoardColumn from '@/components/board/BoardColumn.vue';
+import TaskDetailsSheet from '@/components/board/TaskDetailsSheet.vue';
 import { boardKey } from '@/components/board/boardContext';
 import { useBoard } from '@/composables/useBoard';
 import { useSortable } from '@/composables/useSortable';
-import type { BoardColumn as Column } from '@/types';
+import type {
+    BoardColumn as Column,
+    BoardLabel,
+    BoardMember,
+    ProjectColor,
+    TaskPriority,
+} from '@/types';
 import { useI18n } from '@/composables/useI18n';
 
 const { t } = useI18n();
@@ -14,6 +21,10 @@ const props = defineProps<{
     projectId: number;
     columns: Column[];
     editable: boolean;
+    labels: BoardLabel[];
+    members: BoardMember[];
+    priorities: TaskPriority[];
+    colors: ProjectColor[];
 }>();
 
 /** Mirrors App\Models\Column::MAX_PER_PROJECT. */
@@ -26,6 +37,8 @@ const board = useBoard({
     projectId: () => props.projectId,
     columns: () => props.columns,
     editable: () => props.editable,
+    labels: () => props.labels,
+    members: () => props.members,
     root,
 });
 
@@ -83,5 +96,14 @@ useSortable(list, {
                 {{ t('This board has no columns.') }}
             </p>
         </div>
+
+        <TaskDetailsSheet
+            :project-id="projectId"
+            :editable="editable"
+            :labels="labels"
+            :members="members"
+            :priorities="priorities"
+            :colors="colors"
+        />
     </section>
 </template>

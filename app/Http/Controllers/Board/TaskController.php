@@ -6,6 +6,7 @@ use App\Http\Attributes\CurrentWorkspace;
 use App\Http\Controllers\Concerns\ScopesProjectsToWorkspace;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Board\StoreTaskRequest;
+use App\Http\Requests\Board\UpdateTaskRequest;
 use App\Models\Column;
 use App\Models\Project;
 use App\Models\Task;
@@ -36,6 +37,37 @@ class TaskController extends Controller
                 'position' => Positions::last(Task::query()->whereBelongsTo($column)) + Positions::GAP,
             ]);
         });
+
+        return back();
+    }
+
+    /**
+     * Saves the card's details that were sent: title, description, assignee, due date, priority or labels.
+     */
+    public function update(UpdateTaskRequest $request, #[CurrentWorkspace] Workspace $workspace, Project $project, Task $task): RedirectResponse
+    {
+        $this->ensureInWorkspace($workspace, $project);
+        Gate::authorize('editBoard', $project);
+
+        $project->changeBoard(function () use ($request, $task): void {
+            $task->update($request->changes());
+
+            $labels = $request->labelIds();
+
+            if ($labels !== null) {
+                $task->labels()->sync($labels);
+            }
+        });
+
+        return back();
+    }
+
+    public function destroy(#[CurrentWorkspace] Workspace $workspace, Project $project, Task $task): RedirectResponse
+    {
+        $this->ensureInWorkspace($workspace, $project);
+        Gate::authorize('editBoard', $project);
+
+        $task->delete();
 
         return back();
     }

@@ -1,4 +1,4 @@
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import type { Ref } from 'vue';
 import {
     computed,
@@ -14,6 +14,7 @@ import ColumnPositionController from '@/actions/App/Http/Controllers/Board/Colum
 import TaskController from '@/actions/App/Http/Controllers/Board/TaskController';
 import TaskPositionController from '@/actions/App/Http/Controllers/Board/TaskPositionController';
 import { useI18n } from '@/composables/useI18n';
+import { newTask, withChanges } from '@/lib/tasks';
 import {
     clamp,
     locateTask,
@@ -22,7 +23,13 @@ import {
     withColumnMoved,
     withTaskMoved,
 } from '@/lib/board';
-import type { BoardColumn } from '@/types';
+import type {
+    BoardColumn,
+    BoardLabel,
+    BoardMember,
+    BoardTask,
+    TaskChanges,
+} from '@/types';
 import type { RouteDefinition } from '@/wayfinder';
 
 type Options = {
@@ -30,6 +37,9 @@ type Options = {
     /** The board as the page props hold it: the server's, plus any change still on its way. */
     columns: () => BoardColumn[];
     editable: () => boolean;
+    /** The project's labels and the workspace's members, which cards show and the details panel picks from. */
+    labels: () => BoardLabel[];
+    members: () => BoardMember[];
     /** The board's element, to put focus back on a card after it moved. */
     root: Ref<HTMLElement | null>;
 };
@@ -53,6 +63,9 @@ export function useBoard(options: Options) {
     const lift = ref<Lift | null>(null);
     const announcement = ref('');
     const { t, dir } = useI18n();
+    const page = usePage();
+    /** The card whose details panel is open. Kept in the URL (`?task=`), so the panel can be linked to. */
+    const openTaskId = ref<number | null>(taskInUrl(page.url));
 
     const columns = computed<BoardColumn[]>(() => {
         const board = options.columns();
@@ -75,7 +88,7 @@ export function useBoard(options: Options) {
 
     function send(
         action: RouteDefinition<'post' | 'patch' | 'put' | 'delete'>,
-        data: Record<string, string | number | null>,
+        data: Record<string, string | number | number[] | null>,
         change: (board: BoardColumn[]) => BoardColumn[],
     ): void {
         router.visit(action, {
@@ -229,7 +242,7 @@ export function useBoard(options: Options) {
                               ...column,
                               tasks: [
                                   ...column.tasks,
-                                  { id: temporaryId(), title, pending: true },
+                                  newTask(temporaryId(), title),
                               ],
                           }
                         : column,
@@ -284,6 +297,100 @@ export function useBoard(options: Options) {
             );
         }
     }
+
+    function taskOf(taskId: number): BoardTask | undefined {
+        const at = locateTask(options.columns(), taskId);
+
+        return at ? options.columns()[at.column].tasks[at.index] : undefined;
+    }
+
+    /** Saves some of a card's details, showing them at once. */
+    function updateTask(taskId: number, changes: TaskChanges): void {
+        send(
+            TaskController.update([options.projectId(), taskId]),
+            changes,
+            (board) =>
+                board.map((column) => ({
+                    ...column,
+                    tasks: column.tasks.map((task) =>
+                        task.id === taskId ? withChanges(task, changes) : task,
+                    ),
+                })),
+        );
+    }
+
+    function deleteTask(taskId: number): void {
+        const title = titleOf(taskId);
+
+        send(
+            TaskController.destroy([options.projectId(), taskId]),
+            {},
+            (board) =>
+                board.map((column) => ({
+                    ...column,
+                    tasks: column.tasks.filter(({ id }) => id !== taskId),
+                })),
+        );
+        closeTask();
+        toast.success(t(':name was deleted.', { name: title }));
+        announce(t(':name was deleted.', { name: title }));
+    }
+
+    // The details panel
+
+    const openTask = computed<BoardTask | null>(() =>
+        openTaskId.value === null ? null : (taskOf(openTaskId.value) ?? null),
+    );
+
+    function showTask(taskId: number): void {
+        if (taskOf(taskId)?.pending) {
+            return;
+        }
+
+        openTaskId.value = taskId;
+        replaceUrl(taskId);
+    }
+
+    function closeTask(): void {
+        const taskId = openTaskId.value;
+        openTaskId.value = null;
+        replaceUrl(null);
+
+        if (taskId !== null) {
+            focusTask(taskId);
+        }
+    }
+
+    function replaceUrl(taskId: number | null): void {
+        const url = new URL(page.url, window.location.origin);
+
+        if (taskId === null) {
+            url.searchParams.delete('task');
+        } else {
+            url.searchParams.set('task', String(taskId));
+        }
+
+        router.replace({
+            url: `${url.pathname}${url.search}${url.hash}`,
+            preserveState: true,
+            preserveScroll: true,
+        });
+    }
+
+    // A card someone else deleted (or one linked to that is gone) closes its panel.
+    watch(openTask, (task) => {
+        if (task === null && openTaskId.value !== null) {
+            openTaskId.value = null;
+            replaceUrl(null);
+        }
+    });
+
+    const labelsById = computed(
+        () => new Map(options.labels().map((label) => [label.id, label])),
+    );
+    const membersById = computed(
+        () => new Map(options.members().map((member) => [member.id, member])),
+    );
 
     function titleOf(taskId: number): string {
         const at = locateTask(options.columns(), taskId);
@@ -408,11 +515,20 @@ export function useBoard(options: Options) {
     }
 
     function onCardKeydown(event: KeyboardEvent, taskId: number): void {
+        const lifted = lift.value?.taskId === taskId;
+
+        // Enter opens a card's details, also on a read-only board.
+        if (event.key === 'Enter' && !lifted) {
+            event.preventDefault();
+            showTask(taskId);
+
+            return;
+        }
+
         if (!options.editable()) {
             return;
         }
 
-        const lifted = lift.value?.taskId === taskId;
         // Columns run right to left in Arabic, so the arrow keys follow what the eye sees.
         const forward = dir.value === 'rtl' ? -1 : 1;
         const actions: Record<string, () => void> = lifted
@@ -454,8 +570,23 @@ export function useBoard(options: Options) {
         moveColumn,
         addTask,
         dropTask,
+        updateTask,
+        deleteTask,
         onCardKeydown,
+        openTask,
+        showTask,
+        closeTask,
+        labelsById,
+        membersById,
     };
 }
 
 export type Board = ReturnType<typeof useBoard>;
+
+function taskInUrl(url: string): number | null {
+    const id = Number(
+        new URL(url, 'http://localhost').searchParams.get('task'),
+    );
+
+    return Number.isInteger(id) && id > 0 ? id : null;
+}
