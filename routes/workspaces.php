@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Board\ColumnController;
 use App\Http\Controllers\Board\ColumnPositionController;
+use App\Http\Controllers\Board\LabelController;
 use App\Http\Controllers\Board\TaskController;
 use App\Http\Controllers\Board\TaskPositionController;
 use App\Http\Controllers\Projects\ProjectArchiveController;
@@ -49,7 +50,12 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             Route::put('columns/{column}/position', [ColumnPositionController::class, 'update'])->name('columns.position');
 
             Route::post('columns/{column}/tasks', [TaskController::class, 'store'])->name('tasks.store');
+            Route::patch('tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
+            Route::delete('tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
             Route::put('tasks/{task}/position', [TaskPositionController::class, 'update'])->name('tasks.position');
+
+            Route::post('labels', [LabelController::class, 'store'])->name('labels.store');
+            Route::delete('labels/{label}', [LabelController::class, 'destroy'])->name('labels.destroy');
         });
     });
 });

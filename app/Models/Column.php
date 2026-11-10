@@ -62,7 +62,7 @@ class Column extends Model
     /**
      * The shape the board renders.
      *
-     * @return array{id: int, name: string, tasks: list<array{id: int, title: string}>}
+     * @return array{id: int, name: string, tasks: list<array<string, mixed>>}
      */
     public function toBoard(): array
     {

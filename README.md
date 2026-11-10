@@ -36,8 +36,8 @@ composer ci:check
 - [x] Workspaces, members, and invitations
 - [x] Projects: create, edit, archive and restore, colours and icons, the active ones in the sidebar
 - [x] Kanban board: editable columns, drag and drop for cards and columns with optimistic updates, order saved on the server, keyboard support
-- [ ] Task details: a side panel with description, assignee, due date, priority, and labels
-- [ ] Arabic/English with full RTL, and a refined dark mode
+- [x] Task details: a side panel with description, assignee, due date, priority, and labels
+- [x] Arabic/English with full RTL, and a refined dark mode
 - [ ] One-click demo login with realistic seed data reset on a schedule, and a polished welcome page
 - [ ] Final polish (loading and empty states, accessibility, performance), then the live demo at `orbit.smszs.tech`
 

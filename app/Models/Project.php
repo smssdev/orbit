@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\DB;
  * @property-read User|null $creator
  * @property-read Collection<int, Column> $columns
  * @property-read Collection<int, Task> $tasks
+ * @property-read Collection<int, Label> $labels
  */
 #[Fillable(['workspace_id', 'created_by', 'name', 'description', 'color', 'icon', 'archived_at'])]
 class Project extends Model
@@ -97,13 +98,25 @@ class Project extends Model
     }
 
     /**
+     * @return HasMany<Label, $this>
+     */
+    public function labels(): HasMany
+    {
+        return $this->hasMany(Label::class)->orderBy('name');
+    }
+
+    /**
      * The board: its columns in order, each with its cards in order.
      *
-     * @return list<array{id: int, name: string, tasks: list<array{id: int, title: string}>}>
+     * @return list<array{id: int, name: string, tasks: list<array<string, mixed>>}>
      */
     public function board(): array
     {
-        return array_values($this->columns()->with('tasks')->get()->map(fn (Column $column): array => $column->toBoard())->all());
+        return array_values($this->columns()
+            ->with(['tasks.labels', 'tasks.creator'])
+            ->get()
+            ->map(fn (Column $column): array => $column->toBoard())
+            ->all());
     }
 
     /**

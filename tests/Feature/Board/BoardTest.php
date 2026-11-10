@@ -30,7 +30,11 @@ test('the project page shows the board in order', function (): void {
             ->where('project.can.editBoard', true)
             ->has('columns', 3)
             ->where('columns.0.name', 'To do')
-            ->where('columns.0.tasks', [['id' => $first->id, 'title' => 'First'], ['id' => $second->id, 'title' => 'Second']])
+            ->has('columns.0.tasks', 2)
+            ->where('columns.0.tasks.0.id', $first->id)
+            ->where('columns.0.tasks.0.title', 'First')
+            ->where('columns.0.tasks.1.id', $second->id)
+            ->where('columns.0.tasks.1.title', 'Second')
             ->where('columns.1.tasks.0.title', 'Busy')
             ->where('columns.2.tasks', []));
 });

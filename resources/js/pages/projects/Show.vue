@@ -16,14 +16,20 @@ import { fromNow } from '@/lib/workspaces';
 import { index as projectsIndex } from '@/routes/projects';
 import type {
     BoardColumn,
+    BoardLabel,
+    BoardMember,
     ProjectColor,
     ProjectDetails,
     ProjectIcon,
+    TaskPriority,
 } from '@/types';
 
 const props = defineProps<{
     project: ProjectDetails;
     columns: BoardColumn[];
+    labels: BoardLabel[];
+    members: BoardMember[];
+    priorities: TaskPriority[];
     colors: ProjectColor[];
     icons: ProjectIcon[];
 }>();
@@ -150,6 +156,10 @@ function toggleArchive(): void {
             :project-id="project.id"
             :columns="columns"
             :editable="project.can.editBoard"
+            :labels="labels"
+            :members="members"
+            :priorities="priorities"
+            :colors="colors"
         />
     </div>
 

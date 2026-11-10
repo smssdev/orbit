@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Projects;
 
 use App\Enums\ProjectColor;
 use App\Enums\ProjectIcon;
+use App\Enums\TaskPriority;
 use App\Http\Attributes\CurrentWorkspace;
 use App\Http\Controllers\Concerns\ScopesProjectsToWorkspace;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Projects\SaveProjectRequest;
+use App\Models\Label;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\Workspace;
@@ -76,6 +78,12 @@ class ProjectController extends Controller
                 ],
             ],
             'columns' => $project->board(...),
+            'labels' => fn (): array => array_values($project->labels->map(fn (Label $label): array => $label->summary())->all()),
+            // Who a card can be assigned to.
+            'members' => fn (): array => array_values($workspace->members()->orderBy('name')->get()
+                ->map(fn (User $member): array => ['id' => $member->id, 'name' => $member->name])
+                ->all()),
+            'priorities' => TaskPriority::cases(),
             'colors' => ProjectColor::cases(),
             'icons' => ProjectIcon::cases(),
         ]);
